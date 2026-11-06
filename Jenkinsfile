@@ -1,11 +1,9 @@
-cat > Jenkinsfile <<'EOF'
+
 pipeline {
     agent any
 
     environment {
         AWS_REGION = 'ap-southeast-2'
-        ECR_REPOSITORY = 'pavan-jenkins'
-        AWS_ACCOUNT_ID = '770457184062'
         ECR_URI = '770457184062.dkr.ecr.ap-southeast-2.amazonaws.com/pavan-jenkins'
     }
 
@@ -30,13 +28,11 @@ pipeline {
 
         stage('Verify AWS Identity') {
             steps {
-                sh '''
-                    aws sts get-caller-identity
-                '''
+                sh 'aws sts get-caller-identity'
             }
         }
 
-        stage('Login to AWS ECR') {
+        stage('Login to ECR') {
             steps {
                 sh '''
                     aws ecr get-login-password \
@@ -51,22 +47,19 @@ pipeline {
         stage('Tag Docker Image') {
             steps {
                 sh '''
-                    docker tag \
-                    pavan-jenkins:${BUILD_NUMBER} \
+                    docker tag pavan-jenkins:${BUILD_NUMBER} \
                     ${ECR_URI}:${BUILD_NUMBER}
 
-                    docker tag \
-                    pavan-jenkins:${BUILD_NUMBER} \
+                    docker tag pavan-jenkins:${BUILD_NUMBER} \
                     ${ECR_URI}:latest
                 '''
             }
         }
 
-        stage('Push Docker Image to ECR') {
+        stage('Push Image to ECR') {
             steps {
                 sh '''
                     docker push ${ECR_URI}:${BUILD_NUMBER}
-
                     docker push ${ECR_URI}:latest
                 '''
             }
@@ -75,12 +68,11 @@ pipeline {
 
     post {
         success {
-            echo 'SUCCESS: Jenkins Docker image pushed to AWS ECR!'
+            echo 'Jenkins image successfully pushed to ECR!'
         }
 
         failure {
-            echo 'FAILED: Please check the Jenkins console output.'
+            echo 'Pipeline failed. Check Console Output.'
         }
     }
 }
-EOF
