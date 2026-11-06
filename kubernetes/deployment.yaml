@@ -1,3 +1,4 @@
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -20,9 +21,13 @@ spec:
       securityContext:
         fsGroup: 1000
 
+      imagePullSecrets:
+        - name: ecr-registry-secret
+
       containers:
         - name: jenkins
-          image: YOUR_AWS_ACCOUNT_ID.dkr.ecr.YOUR_REGION.amazonaws.com/jenkins-custom:latest
+          image: 770457184062.dkr.ecr.ap-southeast-2.amazonaws.com/pavan-jenkins:4
+          imagePullPolicy: Always
 
           ports:
             - containerPort: 8080
